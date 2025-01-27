@@ -2,21 +2,24 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const userRoutes = require('./routes/userRoutes');
+const authRoutes = require('./routes/authRoutes');
+const connectDB = require('./config/database');
+const helmet = require('helmet');
+const { auditMiddleware } = require('./middlewares/auditMiddleware');
 
 const app = express();
-require('dotenv').config();
-app.use(cors());
+
+//middlware
 app.use(bodyParser.json());
+app.use(cors());
+app.use(helmet());
+app.use(auditMiddleware)
+require('dotenv').config();
 
-mongoose.connect(process.env.MONGO_URI).then(() =>{
-    console.log('MongoDB conectado');
-}).catch((err)=>{
-    console.log('Erro de conexão com MongoDB', err);
-});
+connectDB();
 
 
-app.use('/api/users', userRoutes);
+app.use('/api/auth', authRoutes);
 app.listen(process.env.PORT,()=>{
     console.log(`Servidor rodando na porta ${process.env.PORT}`);
 });
